@@ -2,14 +2,11 @@ import os
 import shutil
 import sys
 
-from ...wordcount import (
-    count_words,
-    parse_args,
-    preprocess_lines,
-    split_into_words,
-    write_word_counts,
-)
+from ...wordcount import parse_args
+from ..count_words import count_words
 from ..read_all_lines import read_all_lines
+from ..split_into_words import split_into_words
+from ..write_word_counts import write_word_counts
 
 
 def test_parse_args():
@@ -35,39 +32,34 @@ def test_read_all_lines():
     )
 
 
-def test_preprocess_lines():
-    lines = [" Hello, World!  ", "Python is GREAT."]
-    preprocessed = preprocess_lines(lines)
-    assert preprocessed == ["hello, world!", "python is great."]
-
-
 def test_split_into_words():
-    lines = ["hello world", "python is great"]
+    lines = ["hello, world!", "python is great."]
     words = split_into_words(lines)
     assert words == ["hello", "world", "python", "is", "great"]
 
 
 def test_count_words():
-    words = ["hello", "world", "hello"]
+    words = ["hello", "world", "hello", "python"]
     word_counts = count_words(words)
-    assert word_counts == {"hello": 2, "world": 1, "python": 1}  #
+    assert word_counts == {"hello": 2, "world": 1, "python": 1}
 
 
 def test_write_word_counts():
-    output_folder = "data/output_test/"
+    output_folder = "data/output/"
     word_counts = {"hello": 2, "world": 1, "python": 1}
 
     if os.path.exists(output_folder):
         shutil.rmtree(output_folder)
 
-    write_word_counts(word_counts, output_folder)
+    write_word_counts(output_folder, word_counts)
 
-    output_folder = os.path.join(output_folder, "wordcount.tsv")
-    assert os.path.exists(output_folder), "Output file was not created."
+    output_file = os.path.join(output_folder, "wordcount.tsv")
+    assert os.path.exists(output_file), "Output file was not created"
 
-    with open(output_folder, "r", encoding="utf-8") as f:
+    with open(output_file, "r", encoding="utf-8") as f:
         lines = f.readlines()
 
     assert lines == ["hello\t2\n", "world\t1\n", "python\t1\n"]
 
-    shutil.rmtree("data/output_test/")
+    # Clean up
+    shutil.rmtree(output_folder)
